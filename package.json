@@ -1,13 +1,13 @@
 {
   "name": "proekt12",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend Mesto",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
-  "author": "",
+  "author": "Konstantin Okhlynin",
   "license": "ISC",
   "devDependencies": {
     "eslint": "^7.12.1",

@@ -1,23 +1,17 @@
-const routerCards = require('express').Router();
+const router = require('express').Router();
 const path = require('path');
-const cardsPath = path.join(__dirname, '../data/cards.json');
-const fsPromises = require('fs').promises;
+const fs = require('fs');
 
-routerCards.get('/cards', (req, res) => {
-  fsPromises.readFile(cardsPath, { encoding: 'utf8' })
-    .then((data) => {
-      const cards = JSON.parse(data);
-      if (!cards) {
-        res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
-      } else {
-        res.send(cards);
-      }
-    })
-    .catch((err) => {
-      if (err) {
-        res.status(500).send({ message: 'Не-а!' });
-      }
-    });
+const cardsPath = path.join(__dirname, '../data', 'cards.json');
+
+router.get('/cards', (req, res) => {
+  const file = fs.createReadStream(cardsPath);
+  file.on('error', () => {
+    res.set({ 'content-type': 'application/json; charset=utf-8' });
+    res.status(500).send({ message: 'Что то пошло не так' });
+  });
+  res.set({ 'content-type': 'application/json; charset=utf-8' });
+  file.pipe(res);
 });
 
-module.exports = routerCards;
+module.exports = router;
