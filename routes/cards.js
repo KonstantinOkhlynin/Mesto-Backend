@@ -1,19 +1,8 @@
 const router = require('express').Router();
-const path = require('path');
-const fsPromises = require('fs').promises;
+const { getCards, deleteCard, createCard } = require('../controllers/cards');
 
-const cardsPath = path.join(__dirname, '../data', 'cards.json');
-const usersReadFile = (filePath) => fsPromises.readFile(filePath, { encoding: 'utf8' });
-router.get('/cards', (req, res) => {
-  const file = usersReadFile(cardsPath);
-  file
- .then((data) => {
-  const cards = JSON.parse(data);
-  return cards;
- })
- .then((data) => {
-  res.send(data);
- })
-});
+router.get('/cards', getCards);
+router.post('/cards', createCard);
+router.delete('/cards/:id', deleteCard);
 
 module.exports = router;
