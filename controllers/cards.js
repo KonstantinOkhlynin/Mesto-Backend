@@ -7,7 +7,7 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.id)
+  Card.findByIdAndRemove(req.params.owner, req.params.id)
     .then((data) => {
       if (!data) {
         return res.status(404).send({ message: 'Такой карточки нет!' });

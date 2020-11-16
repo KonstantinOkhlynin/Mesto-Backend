@@ -35,9 +35,17 @@ module.exports.createUser = (req, res) => {
       if (!user) {
         return res.status(404).send({ message: 'Проверьте правильность данных' });
       }
-      return res.status(200).send({ user });
+      return res.status(200).send({
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+      });
     })
-    .catch((err) => res.status(400).send({ message: `Ошибка,пользователь не создан ${err}` }));
+    .catch((err) => res.status(400).send(
+
+      { message: `Ошибка,пользователь не создан ${err}` }));
 };
 
 module.exports.login = (req, res) => {
