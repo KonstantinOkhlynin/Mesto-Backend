@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
       validator(link) {
         return validator.isURL(link);
       },
-      message: 'Проверьте правильность написания ссылки!',
+      message: 'Неверный формат URl!',
     },
   },
   email: {
@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
       validator(email) {
         return validator.isEmail(email);
       },
-      message: 'Проверьте правильность написания email!',
+      message: 'Неверный формат Email',
     },
     unique: true,
   },

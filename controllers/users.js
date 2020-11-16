@@ -2,12 +2,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { NODE_ENV, JWT_SECRET = 'dev-secret' } = process.env;
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((data) => res.status(200).send(data))
-    .catch((err) => res.status(404).send({ message: `Произошла ошибка ${err}` }));
+    .catch((err) => res.status(404).send({ message: `Произошла ошибка ${err.message}` }));
 };
 
 module.exports.getUser = (req, res) => {
@@ -19,7 +19,7 @@ module.exports.getUser = (req, res) => {
       return res.status(200).send(data);
     })
     .catch((err) => {
-      res.status(400).send({ message: `Неправильный id ${err}` });
+      res.status(400).send({ message: `Неправильный id ${err.message}` });
     });
 };
 
@@ -30,12 +30,9 @@ module.exports.createUser = (req, res) => {
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
-    }))
+    })).orFail(new Error('NotValidData'))
     .then((user) => {
-      if (!user) {
-        return res.status(404).send({ message: 'Проверьте правильность данных' });
-      }
-      return res.status(200).send({
+      res.status(200).send({
         _id: user._id,
         email: user.email,
         name: user.name,
@@ -43,9 +40,18 @@ module.exports.createUser = (req, res) => {
         avatar: user.avatar,
       });
     })
-    .catch((err) => res.status(400).send(
-
-      { message: `Ошибка,пользователь не создан ${err}` }));
+    .catch((err) => {
+      if (err.message === 'NotValidData') {
+        return res.status(404).send({ message: 'Проверьте правильность данных' });
+      }
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: `Ошибка валидации ${err.message}` });
+      }
+      if (err.name === 'MongoError' && err.code === 11000) {
+        return res.status(409).send({ message: 'Данный email уже используется' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
 };
 
 module.exports.login = (req, res) => {
@@ -58,8 +64,6 @@ module.exports.login = (req, res) => {
         { _id: user._id },
         NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
       );
-
-      // вернём токен
       res.send({ token });
     })
     .catch((err) => {
