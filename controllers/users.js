@@ -30,9 +30,12 @@ module.exports.createUser = (req, res) => {
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
-    })).orFail(new Error('NotValidData'))
+    }))
     .then((user) => {
-      res.status(200).send({
+      if (!user) {
+        return res.status(404).send({ message: 'Проверьте правильность данных' });
+      }
+      return res.status(200).send({
         _id: user._id,
         email: user.email,
         name: user.name,
@@ -41,9 +44,6 @@ module.exports.createUser = (req, res) => {
       });
     })
     .catch((err) => {
-      if (err.message === 'NotValidData') {
-        return res.status(404).send({ message: 'Проверьте правильность данных' });
-      }
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: `Ошибка валидации ${err.message}` });
       }
