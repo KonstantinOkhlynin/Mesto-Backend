@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const { NODE_ENV, JWT_SECRET = 'dev-secret' } = process.env;
+const { JWT_SECRET = 'dev-secret' } = process.env;
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -23,10 +23,15 @@ module.exports.getUser = (req, res) => {
     });
 };
 
+// eslint-disable-next-line consistent-return
 module.exports.createUser = (req, res) => {
+  const pattern = new RegExp(/^[A-Za-z0-9]{8,}$/);
   const {
     name, about, avatar, email, password,
   } = req.body;
+  if (!pattern.test(password)) {
+    return res.status(400).send({ message: 'Пaроль должен быть не менее 8 символов и состоять из заглавных,строчных букв и цифр без пробелов' });
+  }
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
@@ -62,7 +67,7 @@ module.exports.login = (req, res) => {
       // создадим токен
       const token = jwt.sign(
         { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        JWT_SECRET,
       );
       res.send({ token });
     })
