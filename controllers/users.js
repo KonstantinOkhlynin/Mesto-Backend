@@ -1,9 +1,13 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+
+const { JWT_SECRET = 'dev-secret' } = process.env;
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((data) => res.status(200).send(data))
-    .catch((err) => res.status(404).send({ message: `Произошла ошибка ${err}` }));
+    .catch((err) => res.status(404).send({ message: `Произошла ошибка ${err.message}` }));
 };
 
 module.exports.getUser = (req, res) => {
@@ -15,18 +19,61 @@ module.exports.getUser = (req, res) => {
       return res.status(200).send(data);
     })
     .catch((err) => {
-      res.status(400).send({ message: `Неправильный id ${err}` });
+      res.status(400).send({ message: `Неправильный id ${err.message}` });
     });
 };
 
+// eslint-disable-next-line consistent-return
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+  const pattern = new RegExp(/^[A-Za-z0-9]{8,}$/);
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  if (!pattern.test(password)) {
+    return res.status(400).send({ message: 'Пaроль должен быть не менее 8 символов и состоять из заглавных,строчных букв и цифр без пробелов' });
+  }
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
     .then((user) => {
       if (!user) {
         return res.status(404).send({ message: 'Проверьте правильность данных' });
       }
-      return res.status(200).send({ user });
+      return res.status(200).send({
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+      });
     })
-    .catch((err) => res.status(400).send({ message: `Ошибка,пользователь не создан ${err}` }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: `Ошибка валидации ${err.message}` });
+      }
+      if (err.name === 'MongoError' && err.code === 11000) {
+        return res.status(409).send({ message: 'Данный email уже используется' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      // создадим токен
+      const token = jwt.sign(
+        { _id: user._id },
+        JWT_SECRET,
+      );
+      res.send({ token });
+    })
+    .catch((err) => {
+      res
+        .status(401)
+        .send({ message: err.message });
+    });
 };
