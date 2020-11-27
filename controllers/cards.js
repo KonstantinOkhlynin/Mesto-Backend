@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 const Card = require('../models/card');
 const NotForbiddenError = require('../errors/NotForbiddenError');
 const NotFoundError = require('../errors/NotFoundError');
@@ -28,13 +29,13 @@ module.exports.deleteCard = (req, res, next) => {
 };
 
 module.exports.createCard = (req, res, next) => {
-  const { name, link, owner } = req.body;
-  Card.create({ name, link, owner }).orFail(new Error('NotValidData'))
+  const { name, link } = req.body;
+  const owner = req.user._id;
+  Card.create({ name, link, owner })
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
-      if (err.message === 'NotValidData') {
-        return next(new NotFoundError('Проверьте правильность данных'));
+      if (err.name === 'ValidationError') {
+        return next(new BadRequestError(`Ошибка валидации ${err.message}`));
       }
-      return next(new BadRequestError(`Ошибка,карточка не была создана ${err.message}`));
     });
 };

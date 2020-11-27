@@ -28,13 +28,9 @@ module.exports.getUser = (req, res, next) => {
 
 // eslint-disable-next-line consistent-return
 module.exports.createUser = (req, res, next) => {
-  const pattern = new RegExp(/^[A-Za-z0-9]{8,}$/);
   const {
     name, about, avatar, email, password,
   } = req.body;
-  if (!pattern.test(password)) {
-    return next(new BadRequestError('Пaроль должен быть не менее 8 символов и состоять из заглавных,строчных букв и цифр без пробелов'));
-  }
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,

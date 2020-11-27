@@ -42,7 +42,7 @@ app.post('/signup', celebrate({
     about: Joi.string().required().min(2).max(30),
     avatar: Joi.string().required().custom((link) => urlValidator(link)),
     email: Joi.string().required().email(),
-    password: Joi.string().required(),
+    password: Joi.string().required().pattern(new RegExp('^[A-Za-z0-9]{8,}$')),
   }),
 }), createUser);
 
@@ -59,7 +59,7 @@ app.use((err, req, res, next) => {
     .send({
       // проверяем статус и выставляем сообщение в зависимости от него
       message: statusCode === 500
-        ? 'На сервере произошла ошибка'
+        ? err.message
         : message,
     });
 });
