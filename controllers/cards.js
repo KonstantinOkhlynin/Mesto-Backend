@@ -1,37 +1,41 @@
+/* eslint-disable consistent-return */
 const Card = require('../models/card');
+const NotForbiddenError = require('../errors/NotForbiddenError');
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .then((data) => res.status(200).send(data))
-    .catch((err) => res.status(400).send({ message: `Произошла ошибка ${err.message}` }));
+    .then((cards) => res.status(200).send(cards))
+    .catch(next);
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.id).orFail(new Error('NotValidId'))
     .then((data) => {
       if (data.owner.toString() !== req.user._id) {
-        return res.status(403).send({ message: 'Нельзя удалить чужую карточку' });
+        throw new NotForbiddenError('Нельзя удалить чужую карточку');
       }
       return res.status(200).send(data);
     })
     .catch((err) => {
       if (err.message === 'NotValidId') {
-        return res.status(404).send({ message: 'Такой карточки нет!' });
+        return next(new NotFoundError(`Карточка с id ${req.params.id} не найдена`));
       } if (err.name === 'CastError') {
-        return res.status(400).send({ message: `Ошибка валидации id карточки ${req.params.id}` });
+        return next(new BadRequestError(`Ошибка валидации id карточки ${req.params.id}`));
       }
-      return res.status(500).send({ message: err.message });
+      return next(err);
     });
 };
 
-module.exports.createCard = (req, res) => {
-  const { name, link, owner } = req.body;
-  Card.create({ name, link, owner }).orFail(new Error('NotValidData'))
+module.exports.createCard = (req, res, next) => {
+  const { name, link } = req.body;
+  const owner = req.user._id;
+  Card.create({ name, link, owner })
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
-      if (err.message === 'NotValidData') {
-        return res.status(404).send({ message: 'Проверьте правильность данных' });
+      if (err.name === 'ValidationError') {
+        return next(new BadRequestError(`Ошибка валидации ${err.message}`));
       }
-      return res.status(400).send({ message: `Ошибка,карточка не была создана ${err.message}` });
     });
 };

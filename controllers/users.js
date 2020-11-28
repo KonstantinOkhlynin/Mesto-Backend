@@ -4,41 +4,40 @@ const User = require('../models/user');
 
 const { JWT_SECRET = 'dev-secret' } = process.env;
 
-module.exports.getUsers = (req, res) => {
+const UnauthorizedError = require('../errors/UnauthorizedError');
+const ConflictError = require('../errors/ConflictError');
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((data) => res.status(200).send(data))
-    .catch((err) => res.status(404).send({ message: `Произошла ошибка ${err.message}` }));
+    .catch(next);
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.id)
     .then((data) => {
       if (!data) {
-        return res.status(404).send({ message: 'Пользователь с таким id не найдён' });
+        return next(new NotFoundError('Пользователь с таким id не найдён'));
       }
       return res.status(200).send(data);
     })
-    .catch((err) => {
-      res.status(400).send({ message: `Неправильный id ${err.message}` });
-    });
+    .catch((err) => next(new BadRequestError(`Неправильный id ${err.message}`)));
 };
 
 // eslint-disable-next-line consistent-return
-module.exports.createUser = (req, res) => {
-  const pattern = new RegExp(/^[A-Za-z0-9]{8,}$/);
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  if (!pattern.test(password)) {
-    return res.status(400).send({ message: 'Пaроль должен быть не менее 8 символов и состоять из заглавных,строчных букв и цифр без пробелов' });
-  }
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Проверьте правильность данных' });
+        return next(new NotFoundError('Проверьте правильность данных'));
       }
       return res.status(200).send({
         _id: user._id,
@@ -50,16 +49,16 @@ module.exports.createUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: `Ошибка валидации ${err.message}` });
+        return next(new BadRequestError(`Ошибка валидации ${err.message}`));
       }
       if (err.name === 'MongoError' && err.code === 11000) {
-        return res.status(409).send({ message: 'Данный email уже используется' });
+        return next(new ConflictError('Данный email уже используется'));
       }
-      return res.status(500).send({ message: err.message });
+      return next(err);
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -71,9 +70,5 @@ module.exports.login = (req, res) => {
       );
       res.send({ token });
     })
-    .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
-    });
+    .catch((err) => next(new UnauthorizedError(`${err.message}`)));
 };
