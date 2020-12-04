@@ -1,4 +1,4 @@
-![Header](https://github.com/KonstantinOkhlynin/Project15/blob/develop/assets/Mesto%20Backend.png)
+![Header](https://github.com/KonstantinOkhlynin/Project15/blob/develop/assets/Mesto%20Backend.svg)
 
 # Домены для подключения к серверу :
 http(s)://www.mestokonst.students.nomoreparties.xyz
