@@ -1,4 +1,6 @@
-![Header](https://github.com/KonstantinOkhlynin/Project15/blob/develop/assets/Mesto%20Backend.png)
+---------------------------------[![Click to go to the English](https://img.shields.io/badge/-Click_English_readme-a6a6a6?style=for-the-badge&logo=r)](https://github.com/KonstantinOkhlynin/Mesto-Backend/blob/develop/README.EN.MD)--------------------------------
+---
+![Header](https://github.com/KonstantinOkhlynin/Project15/blob/develop/assets/Mesto%20BackendRU.svg)
 
 # Домены для подключения к серверу :
 http(s)://www.mestokonst.students.nomoreparties.xyz
