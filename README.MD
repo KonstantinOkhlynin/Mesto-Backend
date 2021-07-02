@@ -1,7 +1,7 @@
 # Author: Konstantin Okhlynin
-# [**English Readme**](https://github.com/KonstantinOkhlynin/Mesto-Backend/blob/main/README.EN.MD)
+# [**English Readme**](https://github.com/KonstantinOkhlynin/mesto--backend/blob/main/README.EN.MD)
 # Mesto-Backend
-### Проектная работа курса веб-разработки на портале онлайн обучения Яндекс.Практикум. Бэкенд для веб-сайта [Mesto](https://github.com/KonstantinOkhlynin/Mesto), который позволяет регистрировать и выполнять авторизацию пользователя на веб-сайте, а также лайкать, создавать и удалять свои карточки, менять аватар пользователя, имя и основную информацию пользователя. 
+### Проектная работа курса веб-разработки на портале онлайн обучения Яндекс.Практикум. Бэкенд для веб-сайта [Mesto](https://github.com/KonstantinOkhlynin/mesto--frontend), который позволяет регистрировать и выполнять авторизацию пользователя на веб-сайте, а также лайкать, создавать и удалять свои карточки, менять аватар пользователя, имя и основную информацию пользователя. 
 ## Языки
 ### ‣ JavaScript(ES6);
 ## Фреймворк
