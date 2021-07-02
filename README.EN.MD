@@ -1,6 +1,6 @@
 # Author: Konstantin Okhlynin
 # Mesto-Backend
-### Diploma project of the web development course on the online learning portal Practicum by Yandex. Backend for the [Mesto] website(https://github.com/KonstantinOkhlynin/Mesto), which allows you to register and authorize a user on the website, as well as like, create and delete your cards, change the user's avatar, name and basic user information.
+### Diploma project of the web development course on the online learning portal Practicum by Yandex. Backend for the [Mesto](https://github.com/KonstantinOkhlynin/mesto--frontend), which allows you to register and authorize a user on the website, as well as like, create and delete your cards, change the user's avatar, name and basic user information.
 ## Languages
 ### ‣ JavaScript(ES6);
 ## Framework
